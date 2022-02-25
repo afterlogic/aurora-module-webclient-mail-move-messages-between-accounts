@@ -1,0 +1,83 @@
+<div class="popup" style="display: none;">
+	<div class="mask" data-bind="click: cancelPopup"></div>
+	<div class="popup_panel moveto_popup_panel">
+		<span class="close" data-bind="click: cancelPopup"></span>
+		<span class="popup_heading" data-bind="text: popupHeading"></span>
+
+		<div class="fields">
+			<div class="row hint" data-bind="visible: step() === 'accounts'">
+				<span data-bind="i18n: {'key': '%MODULENAME%/LABEL_SELECT_ACCOUNT'}"></span>
+			</div>
+			<div class="row row_moveto_accounts"
+				 data-bind="visible: step() === 'accounts', customScrollbar: {x: false}"
+			>
+				<div class="moveto_item_list scroll-inner" data-bind="foreach: accounts">
+					<div class="moveto_item"
+						 data-bind="click: function () { $parent.selectAccount(id()); }"
+					>
+						<span class="moveto_item_email" data-bind="text: email"></span>
+						<span class="moveto_item_icon"></span>
+					</div>
+				</div>
+			</div>
+
+			<div class="row" data-bind="visible: step() === 'folders'">
+				<div class="moveto_item_list" data-bind="foreach: accounts">
+					<!-- ko if: id() === $parent.selectedAccountId() -->
+					<div class="moveto_item" style="border: 0;"
+						 data-bind="click: function () { $parent.openAccountsStep(); }"
+					>
+						<span class="moveto_item_email" data-bind="text: email"></span>
+						<span class="moveto_item_back_icon"></span>
+					</div>
+					<!-- /ko -->
+				</div>
+			</div>
+			<div class="row hint" data-bind="visible: step() === 'folders'">
+				<span data-bind="i18n: {'key': '%MODULENAME%/LABEL_SELECT_FOLDER'}"></span>
+			</div>
+			<div class="row row_moveto_folders" data-bind="
+				 visible: step() === 'folders', customScrollbar: {x: false}"
+			>
+				<span class="moveto_item_list_info" data-bind="
+					  i18n: {'key': 'COREWEBCLIENT/INFO_LOADING'}, visible: folderListLoading"
+				></span>
+				<div class="moveto_item_list scroll-inner" data-bind="foreach: folders">
+					<div class="moveto_item" data-bind="
+						 css: {'disabled': disable, 'selected': fullName === $parent.selectedFolder()},
+						 click: function () { if (!disable) $parent.selectFolder(fullName); }"
+					>
+						<span class="moveto_item_email" data-bind="text: translatedDisplayName"></span>
+					</div>
+				</div>
+			</div>
+
+			<div class="row row_moveto_info" data-bind="visible: step() === 'moving'">
+				<span class="moveto_item_list_info" data-bind="text: infoText"></span>
+				<span class="moveto_item_list_info"
+					  data-bind="text: progressText, visible: progressText()"
+				></span>
+			</div>
+
+			<div class="buttons">
+				<span class="button"
+					  data-bind="i18n: {'key': '%MODULENAME%/ACTION_MOVE'},
+					  command: moveMessagesCommand, visible: step() !== 'moving'"
+				></span>
+				<span class="button secondary_button"
+					  data-bind="i18n: {'key': 'COREWEBCLIENT/ACTION_CANCEL'}, click: cancelPopup,
+					  visible: step() !== 'moving'"
+				></span>
+				<span class="button secondary_button"
+					  data-bind="i18n: {'key': '%MODULENAME%/ACTION_STOP'}, click: stopMoving,
+					  visible: step() === 'moving' && progressText()"
+				></span>
+				<span class="button secondary_button"
+					  data-bind="i18n: {'key': 'COREWEBCLIENT/ACTION_CLOSE'}, click: cancelPopup,
+					  visible: step() === 'moving' && !progressText()"
+				></span>
+			</div>
+		</div>
+	</div>
+	<span class="helper"></span>
+</div>

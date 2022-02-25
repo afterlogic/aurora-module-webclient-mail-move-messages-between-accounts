@@ -1,0 +1,80 @@
+.moveto_popup_panel {
+	width: 303px;
+	height: 426px;
+}
+
+.row_moveto_folders {
+	height: 255px;
+}
+
+.row_moveto_accounts {
+	height: 289px;
+}
+
+.row_moveto_info {
+	height: 315px;
+}
+
+.row .moveto_item_list_info {
+	color: #929292;
+	display: block;
+	font-size: 13pt;
+	margin: 20px;
+	text-align: center;
+}
+
+.moveto_item_list {
+	height: 100%;
+
+	.moveto_item {
+		border-bottom: 1px solid #d5d9dc;
+		cursor: pointer;
+		line-height: 140%;
+
+		&:hover {
+			background: #f3f3f3;
+		}
+
+		&.disabled {
+			color: #808080;
+			cursor: default;
+
+			&:hover {
+				background: inherit;
+			}
+		}
+
+		&.selected {
+			background: #f3f3f3;
+			cursor: default;
+		}
+
+		.moveto_item_email {
+			display: inline-block;
+			padding: 6px;
+		}
+
+		.moveto_item_icon, .moveto_item_back_icon {
+			.init-icon-font(after);
+
+			font-size: 18pt;
+			padding: 2px 0;
+		}
+
+		.moveto_item_icon {
+			float: right;
+
+			&:after {
+				content: "\e670";
+			}
+		}
+
+		.moveto_item_back_icon {
+			float: left;
+
+			&:after {
+				content: "\e671";
+			}
+		}
+	}
+}

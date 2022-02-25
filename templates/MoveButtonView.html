@@ -1,0 +1,21 @@
+<span class="group move" data-bind="dropdown: {}, command: moveToFolderCommand,
+	  visible: visibleMoveTool, customTooltip: 'MAILWEBCLIENT/ACTION_MOVE_TO_FOLDER'"
+>
+	<span class="item" data-bind="command: openMoveToFolderPopupCommand">
+		<span class="icon"></span>
+		<span class="text" data-bind="i18n: {'key': 'MAILWEBCLIENT/ACTION_MOVE_TO_FOLDER'}"></span>
+	</span>
+	<span class="item control">
+		<span class="icon arrow"></span>
+		<span class="dropdown">
+			<span class="dropdown_helper">
+				<span class="dropdown_arrow"><span></span></span>
+				<span class="dropdown_content">
+					<span class="item"
+						  data-bind="i18n: {'key': '%MODULENAME%/LABEL_NO_HISTORY'}"
+					></span>
+				</span>
+			</span>
+		</span>
+	</span>
+</span>
