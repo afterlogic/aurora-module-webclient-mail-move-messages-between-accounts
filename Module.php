@@ -20,6 +20,19 @@ class Module extends \Aurora\System\Module\AbstractModule
 {
 	public function init() {}
 
+	/**
+	 * Obtains list of module settings.
+	 * @return array
+	 */
+	public function GetSettings()
+	{
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+
+		return [
+			'NumberOfRecordsInHistory' => $this->getConfig('NumberOfRecordsInHistory', 3)
+		];
+	}
+
 	public function MoveMessages($AccountID, $ToAccountID, $Folder, $ToFolder, $Uids)
 	{
 		$mResult = false;

@@ -53,7 +53,7 @@
 			</div>
 
 			<div class="row row_moveto_info" data-bind="visible: step() === 'moving'">
-				<span class="moveto_item_list_info" data-bind="text: infoText"></span>
+				<span class="moveto_item_list_info" data-bind="text: movingInfoText"></span>
 				<span class="moveto_item_list_info"
 					  data-bind="text: progressText, visible: progressText()"
 				></span>
@@ -69,12 +69,12 @@
 					  visible: step() !== 'moving'"
 				></span>
 				<span class="button secondary_button"
-					  data-bind="i18n: {'key': '%MODULENAME%/ACTION_STOP'}, click: stopMoving,
-					  visible: step() === 'moving' && progressText()"
+					  data-bind="i18n: {'key': '%MODULENAME%/ACTION_STOP'}, command: stopMovingCommand,
+					  visible: movingInProgress"
 				></span>
 				<span class="button secondary_button"
 					  data-bind="i18n: {'key': 'COREWEBCLIENT/ACTION_CLOSE'}, click: cancelPopup,
-					  visible: step() === 'moving' && !progressText()"
+					  visible: movingEnded"
 				></span>
 			</div>
 		</div>

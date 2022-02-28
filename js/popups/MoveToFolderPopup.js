@@ -11,6 +11,9 @@ var
 	Api = require('%PathToCoreWebclientModule%/js/Api.js'),
 	CAbstractPopup = require('%PathToCoreWebclientModule%/js/popups/CAbstractPopup.js'),
 	ModulesManager = require('%PathToCoreWebclientModule%/js/ModulesManager.js'),
+	Storage = require('%PathToCoreWebclientModule%/js/Storage.js'),
+
+	Settings = require('modules/%ModuleName%/js/Settings.js'),
 
 	AccountList = ModulesManager.run('MailWebclient', 'getAccountList'),
 	MailCache = ModulesManager.run('MailWebclient', 'getMailCache')
@@ -56,10 +59,41 @@ function CMoveToFolderPopup()
 	}, this);
 	this.moveMessagesCommand = Utils.createCommand(this, this.moveMessages, this.enableMoveButton);
 
-	this.messagesToMove = [];
-	this.infoText = ko.observable('');
-	this.progressText = ko.observable('');
-	this.allowStopMoving = ko.observable(false);
+	this.messagesToMove = ko.observableArray([]);
+	this.movingMessageNumber = ko.computed(function () {
+		return this.checkedCount() - this.messagesToMove().length;
+	}, this);
+	this.movingInProgress = ko.computed(function () {
+		return this.step() === 'moving' && !this.movingStopped() && this.movingMessageNumber() !== this.checkedCount();
+	}, this);
+	this.progressText = ko.computed(function () {
+		if (this.movingInProgress()) {
+			return this.movingMessageNumber() + '/' + this.checkedCount();
+		}
+		return '';
+	}, this);
+
+	this.movingStopped = ko.observable(false);
+	this.movingEnded = ko.computed(function () {
+		return this.step() === 'moving' && (this.movingStopped() || this.movingMessageNumber() === this.checkedCount());
+	}, this);
+	this.enableStopMoving = ko.computed(function () {
+		return this.movingMessageNumber() < this.checkedCount();
+	}, this);
+	this.stopMovingCommand = Utils.createCommand(this, this.stopMoving, this.enableStopMoving);
+
+	this.movingInfoText = ko.computed(function () {
+		if (this.movingStopped()) {
+			return TextUtils.i18n('%MODULENAME%/INFO_MESSAGES_PARTLY_MOVED', {
+				COUNT: this.movingMessageNumber(),
+				TOTAL_COUNT: this.checkedCount()
+			});
+		} else if (this.movingEnded()) {
+			return TextUtils.i18n('%MODULENAME%/INFO_MESSAGES_MOVED');
+		} else {
+			return TextUtils.i18n('%MODULENAME%/INFO_MESSAGES_BEING_MOVED');
+		}
+	}, this);
 }
 
 _.extendOwn(CMoveToFolderPopup.prototype, CAbstractPopup.prototype);
@@ -68,17 +102,28 @@ CMoveToFolderPopup.prototype.PopupTemplate = '%ModuleName%_MoveToFolderPopup';
 
 /**
  * @param {array} checkedUids
+ * @param {observable array} moveHistoryData
+ * @param {int} selectedAccountId
+ * @param {string} selectedFolder
  */
-CMoveToFolderPopup.prototype.onOpen = function (checkedUids)
+CMoveToFolderPopup.prototype.onOpen = function (checkedUids, moveHistoryData, selectedAccountId, selectedFolder)
 {
 	this.checkedUids(checkedUids);
+	this.moveHistoryData = moveHistoryData;
 
 	this.accounts(AccountList ? AccountList.collection() : []);
-	this.selectedAccountId(AccountList ? AccountList.currentId() : 0);
+	this.selectedAccountId(selectedAccountId || (AccountList ? AccountList.currentId() : 0));
+	this.messagesToMove([]);
+	this.movingStopped(false);
 
 	this.populateFolders();
 
-	this.step('folders');
+	if (selectedFolder) {
+		this.selectedFolder(selectedFolder);
+		this.moveMessages();
+	} else {
+		this.step('folders');
+	}
 };
 
 CMoveToFolderPopup.prototype.openAccountsStep = function ()
@@ -120,7 +165,32 @@ CMoveToFolderPopup.prototype.populateFolders = function ()
 
 CMoveToFolderPopup.prototype.moveMessages = function ()
 {
-	const uidsByFolders = MailCache.getUidsSeparatedByFolders(this.checkedUids());
+	if (!MailCache) {
+		throw 'There is no MailCache';
+	}
+
+	const
+		toAccount = AccountList.getAccount(this.selectedAccountId()),
+		toFolderList = MailCache.oFolderListItems[this.selectedAccountId()],
+		toFolder = toFolderList.getFolderByFullName(this.selectedFolder()),
+		uidsByFolders = MailCache.getUidsSeparatedByFolders(this.checkedUids())
+	;
+
+	if (_.isFunction(this.moveHistoryData)) {
+		const moveHistoryData = this.moveHistoryData().filter(data => {
+			const isSameFolder = data.accountId === this.selectedAccountId() && data.folder === this.selectedFolder();
+			return !isSameFolder;
+		}, this);
+		moveHistoryData.unshift({
+			accountId: this.selectedAccountId(),
+			accountEmail: toAccount.email(),
+			folder: this.selectedFolder(),
+			folderDisplayName: toFolder.displayName()
+		});
+		Storage.setData('moveMessagesHistory', moveHistoryData.slice(0, Settings.NumberOfRecordsInHistory + 1));
+		this.moveHistoryData(Storage.getData('moveMessagesHistory') || []);
+	}
+
 	let messagesToMove = [];
 	for (const key in uidsByFolders) {
 		const
@@ -129,11 +199,7 @@ CMoveToFolderPopup.prototype.moveMessages = function ()
 			folderList = MailCache.oFolderListItems[accountId]
 		;
 		if (folderList && accountId === this.selectedAccountId()) {
-			const
-				account = AccountList.getAccount(accountId),
-				fromFolder = folderList.getFolderByFullName(data.sFolder),
-				toFolder = folderList.getFolderByFullName(this.selectedFolder())
-			;
+			const fromFolder = folderList.getFolderByFullName(data.sFolder);
 			MailCache.moveMessagesToFolder(fromFolder, toFolder, data.aUids);
 		} else {
 			messagesToMove = messagesToMove.concat(data.aUids.map(uid => {
@@ -145,11 +211,8 @@ CMoveToFolderPopup.prototype.moveMessages = function ()
 			}));
 		}
 	};
-	if (messagesToMove.length === 0) {
-		this.infoText(TextUtils.i18n('%MODULENAME%/INFO_MESSAGES_MOVED'));
-	} else {
-		this.infoText(TextUtils.i18n('%MODULENAME%/INFO_MESSAGES_BEING_MOVED'));
-		this.messagesToMove = messagesToMove;
+	if (messagesToMove.length > 0 && !this.movingStopped()) {
+		this.messagesToMove(messagesToMove);
 		this.moveOneMessage();
 	}
 	this.step('moving');
@@ -171,69 +234,38 @@ CMoveToFolderPopup.prototype.moveOneMessage = function ()
 	folder.markDeletedByUids([messageData.uid]);
 	MailCache.excludeDeletedMessages();
 
-	this.progressText((this.checkedCount() - this.messagesToMove.length) + '/' + this.checkedCount());
 	Ajax.send('%ModuleName%', 'MoveMessages', parameters, this.onMoveMessagesResponse, this);
 };
 
 CMoveToFolderPopup.prototype.onMoveMessagesResponse = function (response, request)
 {
-	if (this.messagesToMove.length > 0) {
-		this.moveOneMessage();
+	if (response && response.Result) {
+		if (!this.movingStopped() && this.messagesToMove().length > 0) {
+			this.moveOneMessage();
+		}
 	} else {
-		this.infoText(TextUtils.i18n('%MODULENAME%/INFO_MESSAGES_MOVED'));
-		this.progressText('');
+		this.movingStopped(true);
+		const params = request.Parameters;
+		const folderList = MailCache.oFolderListItems[params.AccountID];
+		const folder = folderList.getFolderByFullName(params.Folder);
+		folder.revertDeleted([params.Uids]);
+		this.messagesToMove.unshift({
+			accountId: params.AccountID,
+			folder: params.Folder,
+			uid: params.Uids
+		});
+		Api.showErrorByCode(response, TextUtils.i18n('MAILWEBCLIENT/ERROR_MOVING_MESSAGES'));
 	}
 };
 
 CMoveToFolderPopup.prototype.stopMoving = function ()
 {
-	console.log('stopMoving coming soon...');
-};
-
-CMoveToFolderPopup.prototype.save = function ()
-{
-	if (this.editedFolder && this.editedFolder.parentFullName() !== this.parentFolder()) {
-		const parameters = {
-			'AccountID': this.editedFolder.iAccountId,
-			'PrevFolderFullNameRaw': this.editedFolder.fullName(),
-			'NewFolderNameInUtf8': this.folderName(),
-			'ChangeParent': true,
-			'NewParentFolder': this.parentFolder()
-		};
-
-		this.isSaving(true);
-		Ajax.send('Mail', 'RenameFolder', parameters, this.onResponseFolderRename, this);
-	} else if (this.editedFolder && this.editedFolder.name() !== this.folderName()) {
-		const parameters = {
-			'AccountID': this.editedFolder.iAccountId,
-			'PrevFolderFullNameRaw': this.editedFolder.fullName(),
-			'NewFolderNameInUtf8': this.folderName(),
-			'ChangeParent': false
-		};
-
-		this.isSaving(true);
-		Ajax.send('Mail', 'RenameFolder', parameters, this.onResponseFolderRename, this);
-	} else {
-		this.closePopup();
-	}
-};
-
-CMoveToFolderPopup.prototype.onResponseFolderRename = function (response, request)
-{
-	if (!AccountList && !MailCache) return;
-
-	if (response && response.Result && response.Result.FullName) {
-		MailCache.getFolderList(AccountList.editedId());
-	} else {
-		this.isSaving(false);
-		Api.showErrorByCode(response, TextUtils.i18n('MAILWEBCLIENT/ERROR_RENAME_FOLDER'));
-		MailCache.getFolderList(AccountList.editedId());
-	}
+	this.movingStopped(true);
 };
 
 CMoveToFolderPopup.prototype.cancelPopup = function ()
 {
-	if (!this.isSaving()) {
+	if (!this.movingInProgress()) {
 		this.closePopup();
 	}
 };

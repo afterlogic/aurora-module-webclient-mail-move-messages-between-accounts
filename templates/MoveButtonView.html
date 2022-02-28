@@ -5,15 +5,16 @@
 		<span class="icon"></span>
 		<span class="text" data-bind="i18n: {'key': 'MAILWEBCLIENT/ACTION_MOVE_TO_FOLDER'}"></span>
 	</span>
-	<span class="item control">
+	<span class="item control" data-bind="command: openMoveHistoryCommand">
 		<span class="icon arrow"></span>
-		<span class="dropdown">
+		<span class="dropdown" data-bind="if: moveHistoryData().length > 0">
 			<span class="dropdown_helper">
 				<span class="dropdown_arrow"><span></span></span>
-				<span class="dropdown_content">
-					<span class="item"
-						  data-bind="i18n: {'key': '%MODULENAME%/LABEL_NO_HISTORY'}"
-					></span>
+				<span class="dropdown_content" data-bind="foreach: moveHistoryData">
+					<span class="item" data-bind="click: function () { $parent.openMoveToFolderPopup(accountId, folder); }">
+						<span class="item_moveto_account" data-bind="text: accountEmail"></span>
+						<span class="item_moveto_folder" data-bind="text: folderDisplayName"></span>
+					</span>
 				</span>
 			</span>
 		</span>
