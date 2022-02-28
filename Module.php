@@ -22,6 +22,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 	public function MoveMessages($AccountID, $ToAccountID, $Folder, $ToFolder, $Uids)
 	{
+		$mResult = false;
+
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 
 		$aUids = \Aurora\System\Utils::ExplodeIntUids((string) $Uids);
@@ -59,16 +61,13 @@ class Module extends \Aurora\System\Module\AbstractModule
 					
 								$iNewUid = 0;
 					
-								$oImapClient->MessageAppendStream(
-									$ToFolder, $rMessageStream, $iMessageStreamSize, array(
-										\MailSo\Imap\Enumerations\MessageFlag::SEEN
-									), $iNewUid
-								);
+								$oImapClient->MessageAppendStream($ToFolder, $rMessageStream, $iMessageStreamSize, null, $iNewUid);
 							}
 						}
 					}, $Folder, $iUid);
 				}
 				$oMailModule->getMailManager()->deleteMessage($oAccount, $Folder, $aUids);
+				$mResult = true;
 			}
 			catch (\MailSo\Imap\Exceptions\NegativeResponseException $oException)
 			{
@@ -82,7 +81,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 					$oException->getMessage());
 			}
 	
-			return true;
+			return $mResult;
 		}
 	}
 	
