@@ -62,9 +62,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 				foreach ($aUids as $iUid) {
 
-					$aFlags = isset($aFlags[$iUid]) && in_array('\\seen', $aFlags[$iUid]) ? [\MailSo\Imap\Enumerations\MessageFlag::SEEN] : null;
+					$aAppendFlags = isset($aFlags[$iUid]) && in_array('\\seen', $aFlags[$iUid]) ? [\MailSo\Imap\Enumerations\MessageFlag::SEEN] : null;
 					$oMailModule->getMailManager()->directMessageToStream($oAccount,
-					function($rResource) use ($oImapClient, $ToFolder, $aFlags) {
+					function($rResource) use ($oImapClient, $ToFolder, $aAppendFlags) {
 						if (\is_resource($rResource)) {
 
 							$rMessageStream = \MailSo\Base\ResourceRegistry::CreateMemoryResource();
@@ -78,7 +78,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 					
 								$iNewUid = 0;
 					
-								$oImapClient->MessageAppendStream($ToFolder, $rMessageStream, $iMessageStreamSize, $aFlags, $iNewUid);
+								$oImapClient->MessageAppendStream($ToFolder, $rMessageStream, $iMessageStreamSize, $aAppendFlags, $iNewUid);
 							}
 						}
 					}, $Folder, $iUid);
