@@ -108,11 +108,15 @@ CMoveToFolderPopup.prototype.PopupTemplate = '%ModuleName%_MoveToFolderPopup';
  */
 CMoveToFolderPopup.prototype.onOpen = function (checkedUids, moveHistoryData, selectedAccountId, selectedFolder)
 {
+	if (!AccountList) {
+		throw 'There is no AccountList';
+	}
+
 	this.checkedUids(checkedUids);
 	this.moveHistoryData = moveHistoryData;
 
-	this.accounts(AccountList ? AccountList.collection() : []);
-	this.selectedAccountId(selectedAccountId || (AccountList ? AccountList.currentId() : 0));
+	this.accounts(AccountList.collection());
+	this.selectedAccountId(selectedAccountId || AccountList.currentId());
 	this.messagesToMove([]);
 	this.movingStopped(false);
 
@@ -147,9 +151,13 @@ CMoveToFolderPopup.prototype.selectFolder = function (folderFullName)
 
 CMoveToFolderPopup.prototype.populateFolders = function ()
 {
-	if (!MailCache || !AccountList) {
-		return;
+	if (!AccountList) {
+		throw 'There is no AccountList';
 	}
+	if (!MailCache) {
+		throw 'There is no MailCache';
+	}
+
 	const folderList = MailCache.oFolderListItems[this.selectedAccountId()];
 	if (folderList) {
 		const disabledFolders = this.selectedAccountId() === AccountList.currentId()
@@ -165,6 +173,9 @@ CMoveToFolderPopup.prototype.populateFolders = function ()
 
 CMoveToFolderPopup.prototype.moveMessages = function ()
 {
+	if (!AccountList) {
+		throw 'There is no AccountList';
+	}
 	if (!MailCache) {
 		throw 'There is no MailCache';
 	}
@@ -185,10 +196,10 @@ CMoveToFolderPopup.prototype.moveMessages = function ()
 			accountId: this.selectedAccountId(),
 			accountEmail: toAccount.email(),
 			folder: this.selectedFolder(),
-			folderDisplayName: toFolder.displayName()
+			folderDisplayFullName: toFolder.displayFullName()
 		});
-		Storage.setData('moveMessagesHistory', moveHistoryData.slice(0, Settings.NumberOfRecordsInHistory + 1));
-		this.moveHistoryData(Storage.getData('moveMessagesHistory') || []);
+		Storage.setData('moveMessagesHistoryData', moveHistoryData.slice(0, Settings.NumberOfRecordsInHistory + 1));
+		this.moveHistoryData(Storage.getData('moveMessagesHistoryData') || []);
 	}
 
 	let messagesToMove = [];
@@ -220,6 +231,10 @@ CMoveToFolderPopup.prototype.moveMessages = function ()
 
 CMoveToFolderPopup.prototype.moveOneMessage = function ()
 {
+	if (!MailCache) {
+		throw 'There is no MailCache';
+	}
+
 	const messageData = this.messagesToMove.shift();
 	const parameters = {
 		'AccountID': messageData.accountId,
@@ -239,6 +254,10 @@ CMoveToFolderPopup.prototype.moveOneMessage = function ()
 
 CMoveToFolderPopup.prototype.onMoveMessagesResponse = function (response, request)
 {
+	if (!MailCache) {
+		throw 'There is no MailCache';
+	}
+
 	if (response && response.Result) {
 		if (!this.movingStopped() && this.messagesToMove().length > 0) {
 			this.moveOneMessage();

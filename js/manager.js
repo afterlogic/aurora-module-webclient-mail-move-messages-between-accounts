@@ -21,13 +21,17 @@ function initMoveToFolderButton(ModulesManager, view)
 		moveHistoryData = ko.observableArray([])
 	;
 
+	if (!MailCache) {
+		throw 'There is no MailCache';
+	}
+
 	view.moveToFolderTemplate = '%ModuleName%_MoveButtonView';
 	view.openMoveToFolderPopupCommand = Utils.createCommand(view, function () {
 		const MoveToFolderPopup = require('modules/%ModuleName%/js/popups/MoveToFolderPopup.js');
 		Popups.showPopup(MoveToFolderPopup, [view.oMessageList.checkedOrSelectedUids(), moveHistoryData]);
 	}, view.isEnableGroupOperations);
 
-	moveHistoryData(Storage.getData('moveMessagesHistory') || []);
+	moveHistoryData(Storage.getData('moveMessagesHistoryData') || []);
 	view.moveHistoryData = ko.computed(function () {
 		const
 			currentAccountId = MailCache.currentAccountId(),

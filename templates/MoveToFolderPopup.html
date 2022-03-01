@@ -5,8 +5,8 @@
 		<span class="popup_heading" data-bind="text: popupHeading"></span>
 
 		<div class="fields">
-			<div class="row hint" data-bind="visible: step() === 'accounts'">
-				<span data-bind="i18n: {'key': '%MODULENAME%/LABEL_SELECT_ACCOUNT'}"></span>
+			<div class="row" data-bind="visible: step() === 'accounts'">
+				<span class="moveto_item_list_info" data-bind="i18n: {'key': '%MODULENAME%/LABEL_SELECT_ACCOUNT'}"></span>
 			</div>
 			<div class="row row_moveto_accounts"
 				 data-bind="visible: step() === 'accounts', customScrollbar: {x: false}"
@@ -21,7 +21,7 @@
 				</div>
 			</div>
 
-			<div class="row" data-bind="visible: step() === 'folders'">
+			<div class="row row_moveto_selected_account" data-bind="visible: step() === 'folders'">
 				<div class="moveto_item_list" data-bind="foreach: accounts">
 					<!-- ko if: id() === $parent.selectedAccountId() -->
 					<div class="moveto_item" style="border: 0;"
@@ -33,8 +33,8 @@
 					<!-- /ko -->
 				</div>
 			</div>
-			<div class="row hint" data-bind="visible: step() === 'folders'">
-				<span data-bind="i18n: {'key': '%MODULENAME%/LABEL_SELECT_FOLDER'}"></span>
+			<div class="row" data-bind="visible: step() === 'folders'">
+				<span class="moveto_item_list_info" data-bind="i18n: {'key': '%MODULENAME%/LABEL_SELECT_FOLDER'}"></span>
 			</div>
 			<div class="row row_moveto_folders" data-bind="
 				 visible: step() === 'folders', customScrollbar: {x: false}"
@@ -54,7 +54,7 @@
 
 			<div class="row row_moveto_info" data-bind="visible: step() === 'moving'">
 				<span class="moveto_item_list_info" data-bind="text: movingInfoText"></span>
-				<span class="moveto_item_list_info"
+				<span class="moveto_count_info"
 					  data-bind="text: progressText, visible: progressText()"
 				></span>
 			</div>
