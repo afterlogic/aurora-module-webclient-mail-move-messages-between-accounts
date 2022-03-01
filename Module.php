@@ -57,6 +57,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 			try
 			{
 				$oImapClient = $oMailModule->getMailManager()->_getImapClient($oToAccount);
+
+				$aFlags = $oMailModule->getMailManager()->getMessagesFlags($oAccount, $Folder, $aUids);
+
 				foreach ($aUids as $iUid) {
 
 					$oMailModule->getMailManager()->directMessageToStream($oAccount,
