@@ -28,7 +28,7 @@ function initMoveToFolderButton(ModulesManager, view)
 	view.moveToFolderTemplate = '%ModuleName%_MoveButtonView';
 	view.openMoveToFolderPopupCommand = Utils.createCommand(view, function () {
 		const MoveToFolderPopup = require('modules/%ModuleName%/js/popups/MoveToFolderPopup.js');
-		Popups.showPopup(MoveToFolderPopup, [view.oMessageList.checkedOrSelectedUids(), moveHistoryData]);
+		Popups.showPopup(MoveToFolderPopup, [view.messageList().checkedOrSelectedUids(), moveHistoryData]);
 	}, view.isEnableGroupOperations);
 
 	moveHistoryData(Storage.getData('moveMessagesHistoryData') || []);
@@ -49,7 +49,7 @@ function initMoveToFolderButton(ModulesManager, view)
 		() => {}, () => view.moveHistoryData().length > 0);
 	view.openMoveToFolderPopup = function (accountId, folder) {
 		const MoveToFolderPopup = require('modules/%ModuleName%/js/popups/MoveToFolderPopup.js');
-		Popups.showPopup(MoveToFolderPopup, [view.oMessageList.checkedOrSelectedUids(), moveHistoryData, accountId, folder]);
+		Popups.showPopup(MoveToFolderPopup, [view.messageList().checkedOrSelectedUids(), moveHistoryData, accountId, folder]);
 	};
 }
 
