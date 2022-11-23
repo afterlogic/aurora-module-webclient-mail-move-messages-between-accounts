@@ -3,7 +3,6 @@
 const
 	ko = require('knockout'),
 
-	TextUtils = require('%PathToCoreWebclientModule%/js/utils/Text.js'),
 	Utils = require('%PathToCoreWebclientModule%/js/utils/Common.js'),
 
 	App = require('%PathToCoreWebclientModule%/js/App.js'),
