@@ -30,7 +30,7 @@ function initMoveToFolderButton(ModulesManager, view)
 		Popups.showPopup(MoveToFolderPopup, [view.messageList().checkedOrSelectedUids(), moveHistoryData]);
 	}, view.isEnableGroupOperations);
 
-	moveHistoryData(Storage.getData('moveMessagesHistoryData') || []);
+	moveHistoryData(Storage.getData('aurora_custom_move-messages-history-data') || []);
 	view.moveHistoryData = ko.computed(function () {
 		const
 			currentAccountId = MailCache.currentAccountId(),

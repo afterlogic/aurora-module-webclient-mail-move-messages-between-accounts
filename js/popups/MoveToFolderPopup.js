@@ -198,8 +198,8 @@ CMoveToFolderPopup.prototype.moveMessages = function ()
 			folder: this.selectedFolder(),
 			folderDisplayFullName: toFolder.displayFullName()
 		});
-		Storage.setData('moveMessagesHistoryData', moveHistoryData.slice(0, Settings.NumberOfRecordsInHistory + 1));
-		this.moveHistoryData(Storage.getData('moveMessagesHistoryData') || []);
+		Storage.setData('aurora_custom_move-messages-history-data', moveHistoryData.slice(0, Settings.NumberOfRecordsInHistory + 1));
+		this.moveHistoryData(Storage.getData('aurora_custom_move-messages-history-data') || []);
 	}
 
 	let messagesToMove = [];
