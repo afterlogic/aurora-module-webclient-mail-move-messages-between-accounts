@@ -47,6 +47,7 @@ class Module extends \Aurora\System\Module\AbstractModule
             throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::InvalidInputParameter);
         }
 
+        /** @var \Aurora\Modules\Mail\Module $oMailModule */
         $oMailModule = \Aurora\Api::GetModule('Mail');
         if ($oMailModule) {
             $oAccount = $oMailModule->getAccountsManager()->getAccountById($AccountID);
