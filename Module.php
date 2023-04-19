@@ -14,6 +14,8 @@ use Aurora\Modules\Mail;
  * @license https://afterlogic.com/products/common-licensing Afterlogic Software License
  * @copyright Copyright (c) 2023, Afterlogic Corp.
  *
+ * @property Settings $oModuleSettings
+ *
  * @package Modules
  */
 class Module extends \Aurora\System\Module\AbstractModule
@@ -49,7 +51,7 @@ class Module extends \Aurora\System\Module\AbstractModule
         \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 
         return [
-            'NumberOfRecordsInHistory' => $this->getConfig('NumberOfRecordsInHistory', 3)
+            'NumberOfRecordsInHistory' => $this->oModuleSettings->NumberOfRecordsInHistory
         ];
     }
 
