@@ -20,9 +20,7 @@ use Aurora\Modules\Mail;
  */
 class Module extends \Aurora\System\Module\AbstractModule
 {
-    public function init()
-    {
-    }
+    public function init() {}
 
     /**
      * @return Module
@@ -123,7 +121,7 @@ class Module extends \Aurora\System\Module\AbstractModule
                 throw new \Aurora\Modules\Mail\Exceptions\Exception(
                     Mail\Enums\ErrorCodes::CannotMoveMessageQuota,
                     $oException,
-                    $oResponse instanceof \MailSo\Imap\Response ? $oResponse->Tag.' '.$oResponse->StatusOrIndex.' '.$oResponse->HumanReadable : ''
+                    $oResponse instanceof \MailSo\Imap\Response ? $oResponse->Tag . ' ' . $oResponse->StatusOrIndex . ' ' . $oResponse->HumanReadable : ''
                 );
             } catch (\Exception $oException) {
                 throw new \Aurora\Modules\Mail\Exceptions\Exception(
